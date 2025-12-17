@@ -1,0 +1,89 @@
+/* Global Styles - Matching Alternative Template */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+  color: #333;
+  line-height: 1.5;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+input, button {
+  font-family: inherit;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.loading-spinner i {
+  font-size: 40px;
+  color: #1a5d3a;
+  animation: spin 1s linear infinite;
+}
+
+.loading-spinner p {
+  color: #666;
+  font-size: 18px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Slide up animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Seller App specific styles */
+.seller-app {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Color scheme from alternative template */
+:root {
+  --primary-green: #1a5d3a;
+  --dark-green: #0d3b2a;
+  --accent-yellow: #ffcc00;
+  --accent-pink: #ff3366;
+  --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-green: linear-gradient(rgba(26, 93, 58, 0.9), rgba(13, 59, 42, 0.9));
+}
