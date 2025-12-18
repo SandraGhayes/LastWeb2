@@ -1,22 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import './Login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState('buyer');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const navigate = useNavigate();
-
-  // Dynamic Base URL: Uses localhost if on localhost, otherwise uses the network IP/hostname
-  const BASE_URL = `http://${window.location.hostname}:5001`;
-
-
+  const { login, register } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,30 +28,18 @@ const Login = () => {
   const handleLogin = async () => {
     setIsLoading(true);
     setError('');
+
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/login/buyer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email: email.trim(), password }) // Role not needed for specific endpoint
-      });
+      const result = await login(email.trim(), password);
 
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.message || 'Invalid email or password');
-
-      localStorage.setItem('user', JSON.stringify({
-        email: data.user.email,
-        name: data.user.name,
-        type: data.user.role,
-        isAuthenticated: true
-      }));
-
-      setIsLoading(false);
-      navigate('/marketplace');
-
+      if (result.success) {
+        navigate('/marketplace');
+      } else {
+        setError(result.error || 'Invalid email or password');
+      }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An error occurred during login');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -91,34 +75,20 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/api/auth/register/buyer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({
-          name: fullName.trim(),
-          email: email.trim(),
-          password: password
-        })
+      const result = await register({
+        name: fullName.trim(),
+        email: email.trim(),
+        password: password
       });
 
-      const data = await response.json();
-
-      if (!response.ok) throw new Error(data.message || 'User with this email already exists');
-
-      localStorage.setItem('user', JSON.stringify({
-        email: data.user.email,
-        name: data.user.name,
-        type: data.user.role,
-        isAuthenticated: true
-      }));
-
-      alert(`Account created successfully! Welcome ${data.user.name}`);
-      setIsLoading(false);
-      navigate('/marketplace');
-
+      if (result.success) {
+        navigate('/marketplace');
+      } else {
+        setError(result.error || 'Registration failed');
+      }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'An error occurred during registration');
+    } finally {
       setIsLoading(false);
     }
   };

@@ -4,7 +4,7 @@ const Item = require('../models/item');
 exports.createOrder = async ({ buyerId, items }) => {
   // items: [{ itemId, quantity }]
   // fetch items and compute total
-  const itemDocs = await Item.find({ _id: { $in: items.map(i => i.itemId) }});
+  const itemDocs = await Item.find({ _id: { $in: items.map(i => i.itemId) } });
   const itemsSnapshot = items.map(i => {
     const doc = itemDocs.find(d => d._id.equals(i.itemId));
     if (!doc) throw new Error('Item not found: ' + i.itemId);
@@ -24,4 +24,12 @@ exports.updateStatus = async (orderId, sellerId, status) => {
   order.status = status;
   await order.save();
   return order;
+};
+
+exports.getBuyerOrders = async (buyerId) => {
+  const orders = await Order.find({ buyerId })
+    .populate('sellerId', 'name email sellerProfile')
+    .populate('items.itemId', 'title images price')
+    .sort({ createdAt: -1 });
+  return orders;
 };

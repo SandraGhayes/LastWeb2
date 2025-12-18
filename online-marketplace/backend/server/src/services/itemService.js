@@ -11,3 +11,8 @@ exports.listItems = async (filter = {}, { page = 1, limit = 20 } = {}) => {
   const count = await Item.countDocuments(filter);
   return { items, count, page, limit };
 };
+
+exports.getItemById = async (itemId) => {
+  const item = await Item.findById(itemId).populate('sellerId', 'name email sellerProfile');
+  return item;
+};
