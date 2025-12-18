@@ -3,7 +3,7 @@ import { useState } from "react";
 import "./PageStyles.css";
 
 function YourListings() {
-  // Temporary sample items — now including price
+  // Temporary sample items _ now including price
   const [products, setProducts] = useState([
     { id: 1, name: "Football", stock: 10, price: 25.99, image: "https://i.imgur.com/sf1.jpg" },
     { id: 2, name: "Basketball Shoes", stock: 5, price: 75.5, image: "https://i.imgur.com/523.jpg" },
