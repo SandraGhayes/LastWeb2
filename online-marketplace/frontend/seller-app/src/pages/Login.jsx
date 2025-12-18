@@ -44,14 +44,14 @@ const Login = () => {
       if (!response.ok) throw new Error(data.message || 'Invalid email or password');
 
       localStorage.setItem('user', JSON.stringify({
-        email: data.user.email,
-        name: data.user.name,
-        type: data.user.role,
+        email: data.data.user.email,
+        name: data.data.user.name,
+        type: data.data.user.role,
         isAuthenticated: true
       }));
 
       setIsLoading(false);
-      navigate('/');
+      navigate('/dashboard');
 
     } catch (err) {
       setError(err.message);
@@ -105,15 +105,15 @@ const Login = () => {
       if (!response.ok) throw new Error(data.message || 'User with this email already exists');
 
       localStorage.setItem('user', JSON.stringify({
-        email: data.user.email,
-        name: data.user.name,
-        type: data.user.role,
+        email: data.data.user.email,
+        name: data.data.user.name,
+        type: data.data.user.role,
         isAuthenticated: true
       }));
 
-      alert(`Account created successfully! Welcome ${data.user.name}`);
+      alert(`Account created successfully! Welcome ${data.data.user.name}`);
       setIsLoading(false);
-      navigate('/');
+      navigate('/dashboard');
 
     } catch (err) {
       setError(err.message);
