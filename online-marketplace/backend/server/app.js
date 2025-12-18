@@ -10,33 +10,21 @@ const app = express();
 // ====================
 // 1️⃣ CORS CONFIG
 // ====================
-const allowedOrigins = ['http://localhost:3001', 'http://localhost:5175'];
+const allowedOrigins = ['http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:5175', 'http://192.168.1.39:3002', 'http://192.168.1.39:3003'];
 
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
-      // optional: allow all for dev, or fail
-      // return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
-      // For dev simplicity, let's strictly allow listed origins or just return the origin if valid
-      return callback(null, false);
+      // For dev, allow all origins - change this in production
+      return callback(null, true);
     }
     return callback(null, true);
   },
   credentials: true,
-}));
-
-// Handle preflight requests for all routes
-app.options('*', cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(null, false);
-    }
-  },
-  credentials: true
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // ====================
@@ -62,7 +50,7 @@ app.use((err, req, res, next) => {
 // ====================
 // 5️⃣ DATABASE CONNECTION
 // ====================
-const mongoURL = process.env.MONGO_URL || 'mongodb://localhost:27017/marketPlace';
+const mongoURL = process.env.DB_URI || process.env.MONGO_URL || 'mongodb://localhost:27017/marketPlace';
 mongoose.connect(mongoURL)
   .then(() => console.log('Connected to MongoDB:', mongoURL))
   .catch(err => {
