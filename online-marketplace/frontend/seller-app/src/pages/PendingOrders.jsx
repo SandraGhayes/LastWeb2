@@ -1,144 +1,144 @@
 import Sidebar from "../components/Sidebar";
 import { useState } from "react";
-import OrdersFilterBar from "../components/OrdersFilterBar";
+import { Link } from "react-router-dom";
 import "./PageStyles.css";
 
 function PendingOrders() {
-  // Sample pending orders
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [pendingOrders, setPendingOrders] = useState([
-    {
-      id: 1,
-      product: "Football",
-      quantity: 2,
-      buyer: "John Doe",
-      image: "https://i.imgur.com/sf1.jpg",
-      category: "Sports",
-      dateOrdered: "2025-01-15",
-      price: 25.99,
-    },
-    {
-      id: 2,
-      product: "Basketball Shoes",
-      quantity: 1,
-      buyer: "Jane Smith",
-      image: "https://i.imgur.com/523.jpg",
-      category: "Sports",
-      dateOrdered: "2025-01-14",
-      price: 75.50,
-    },
-    {
-      id: 3,
-      product: "Tennis Racket",
-      quantity: 1,
-      buyer: "Mike Johnson",
-      image: "https://i.imgur.com/UI1.jpg",
-      category: "Sports",
-      dateOrdered: "2025-01-13",
-      price: 120.00,
-    },
+    { id: 1231, product: "Wireless Earbuds Pro", qty: 2, buyer: "Ahmed M.", email: "ahmed@email.com", amount: 178, date: "2024-01-15", status: "Awaiting Shipment", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100" },
+    { id: 1230, product: "Smart Watch Series X", qty: 1, buyer: "Sara K.", email: "sara@email.com", amount: 199, date: "2024-01-15", status: "Processing", image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=100" },
+    { id: 1229, product: "Bluetooth Speaker", qty: 1, buyer: "Omar A.", email: "omar@email.com", amount: 65, date: "2024-01-14", status: "Awaiting Shipment", image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=100" },
+    { id: 1228, product: "Laptop Stand Pro", qty: 1, buyer: "Laila A.", email: "laila@email.com", amount: 45, date: "2024-01-14", status: "Processing", image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100" },
+    { id: 1227, product: "USB-C Hub 7-in-1", qty: 2, buyer: "Youssef K.", email: "youssef@email.com", amount: 70, date: "2024-01-13", status: "Awaiting Shipment", image: "https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?w=100" },
   ]);
 
-  const [filteredOrders, setFilteredOrders] = useState(pendingOrders);
-
-  // Optional: handle order cancellation
-  const cancelOrder = (orderId) => {
-    const orderToCancel = pendingOrders.find((o) => o.id === orderId);
-    if (!orderToCancel) return;
-
-    // Remove order from pending
-    const updated = pendingOrders.filter((o) => o.id !== orderId);
-    setPendingOrders(updated);
-    setFilteredOrders(updated);
-
-    // Here you can also increase product stock in YourListings
-    // This requires lifting state or using global state/context
-    alert(`Order for ${orderToCancel.product} cancelled. Stock should be updated.`);
+  const handleShip = (orderId) => {
+    setPendingOrders(pendingOrders.filter(o => o.id !== orderId));
+    alert(`Order #${orderId} marked as shipped!`);
   };
 
-  const applyFilters = (filters) => {
-    let data = [...pendingOrders];
-
-    // By date ordered
-    if (filters.dateSold) {
-      data = data.filter((o) => o.dateOrdered === filters.dateSold);
+  const handleCancel = (orderId) => {
+    if (window.confirm(`Are you sure you want to cancel order #${orderId}?`)) {
+      setPendingOrders(pendingOrders.filter(o => o.id !== orderId));
     }
-
-    // By date published
-    if (filters.datePublished) {
-      data = data.filter((o) => o.dateOrdered === filters.datePublished);
-    }
-
-    // Category
-    if (filters.category.trim() !== "") {
-      data = data.filter((o) =>
-        o.category.toLowerCase().includes(filters.category.toLowerCase())
-      );
-    }
-
-    // Price range
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange === "600+"
-        ? [600, Infinity]
-        : filters.priceRange.split("-").map(Number);
-
-      data = data.filter((o) => o.price >= min && o.price <= max);
-    }
-
-    // Sorting
-    if (filters.sort === "high-low") {
-      data.sort((a, b) => b.price - a.price);
-    } else if (filters.sort === "low-high") {
-      data.sort((a, b) => a.price - b.price);
-    } else if (filters.sort === "recent") {
-      data.sort((a, b) => new Date(b.dateOrdered) - new Date(a.dateOrdered));
-    }
-
-    setFilteredOrders(data);
   };
+
+  const filteredOrders = pendingOrders.filter(order => {
+    const matchesFilter = filter === "all" ||
+      (filter === "awaiting" && order.status === "Awaiting Shipment") ||
+      (filter === "processing" && order.status === "Processing");
+    const matchesSearch = order.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.buyer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.id.toString().includes(searchTerm);
+    return matchesFilter && matchesSearch;
+  });
+
+  const awaitingCount = pendingOrders.filter(o => o.status === "Awaiting Shipment").length;
+  const processingCount = pendingOrders.filter(o => o.status === "Processing").length;
 
   return (
     <div className="seller-app">
       <Sidebar />
       <div className="page-container">
         <div className="page-header">
-          <h1 className="page-title">
-            <i className="fas fa-clock"></i> Pending Orders
-          </h1>
-          <p className="page-subtitle">These are all the orders that have been placed but not delivered yet</p>
+          <div className="header-content-left">
+            <h1 className="page-title">
+              <i className="fas fa-clock"></i> Pending Orders
+            </h1>
+            <p className="page-subtitle">Orders that need your attention</p>
+          </div>
+          <div className="header-stats">
+            <div className="header-stat">
+              <span className="num">{pendingOrders.length}</span>
+              <span className="label">Total Pending</span>
+            </div>
+          </div>
         </div>
 
-        <div className="content-card">
-          <OrdersFilterBar onFilterChange={applyFilters} showDateSold={false} />
+        {/* Filters */}
+        <div className="content-card filter-card">
+          <div className="filter-row">
+            <div className="filter-tabs">
+              <button
+                className={`filter-tab ${filter === "all" ? "active" : ""}`}
+                onClick={() => setFilter("all")}
+              >
+                All ({pendingOrders.length})
+              </button>
+              <button
+                className={`filter-tab ${filter === "awaiting" ? "active" : ""}`}
+                onClick={() => setFilter("awaiting")}
+              >
+                <i className="fas fa-truck"></i> Awaiting Shipment ({awaitingCount})
+              </button>
+              <button
+                className={`filter-tab ${filter === "processing" ? "active" : ""}`}
+                onClick={() => setFilter("processing")}
+              >
+                <i className="fas fa-cog"></i> Processing ({processingCount})
+              </button>
+            </div>
+            <div className="search-box">
+              <i className="fas fa-search"></i>
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
 
+        {/* Orders List */}
         <div className="content-card">
           {filteredOrders.length === 0 ? (
             <div className="empty-state">
               <i className="fas fa-inbox"></i>
-              <p>No pending orders found.</p>
+              <h3>No pending orders</h3>
+              <p>All caught up! No orders match your criteria.</p>
             </div>
           ) : (
-            <div className="product-grid">
+            <div className="orders-list-enhanced">
               {filteredOrders.map((order) => (
-                <div key={order.id} className="product-card">
-                  <img
-                    src={order.image}
-                    alt={order.product}
-                    className="product-image"
-                  />
-                  <div className="product-info">
-                    <h3 className="product-name">{order.product}</h3>
-                    {order.category && <p className="product-stock"><strong>Category:</strong> {order.category}</p>}
-                    <p className="product-stock">Quantity: {order.quantity}</p>
-                    {order.price && <p className="product-price">Price: ${order.price.toFixed(2)}</p>}
-                    <p className="product-stock">Buyer: {order.buyer}</p>
-                    {order.dateOrdered && <p className="product-stock" style={{ fontSize: "12px" }}>Date: {order.dateOrdered}</p>}
-                    <button
-                      onClick={() => cancelOrder(order.id)}
-                      className="btn-danger"
-                      style={{ width: "100%", marginTop: "10px" }}
-                    >
-                      <i className="fas fa-times"></i> Cancel Order
+                <div key={order.id} className="order-card">
+                  <div className="order-main">
+                    <img src={order.image} alt={order.product} className="order-img" />
+                    <div className="order-details">
+                      <div className="order-header">
+                        <span className="order-id">Order #{order.id}</span>
+                        <span className={`status-badge ${order.status === "Processing" ? "processing" : "pending"}`}>
+                          {order.status}
+                        </span>
+                      </div>
+                      <h3 className="order-product">{order.product}</h3>
+                      <p className="order-qty">Quantity: {order.qty}</p>
+                    </div>
+                  </div>
+                  <div className="order-customer">
+                    <h4>Customer</h4>
+                    <p className="customer-name"><i className="fas fa-user"></i> {order.buyer}</p>
+                    <p className="customer-email"><i className="fas fa-envelope"></i> {order.email}</p>
+                  </div>
+                  <div className="order-info">
+                    <div className="info-item">
+                      <span className="info-label">Order Date</span>
+                      <span className="info-value">{order.date}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Amount</span>
+                      <span className="info-value amount">${order.amount}</span>
+                    </div>
+                  </div>
+                  <div className="order-actions">
+                    <button className="btn-ship" onClick={() => handleShip(order.id)}>
+                      <i className="fas fa-truck"></i> Mark as Shipped
+                    </button>
+                    <button className="btn-cancel" onClick={() => handleCancel(order.id)}>
+                      <i className="fas fa-times"></i> Cancel
                     </button>
                   </div>
                 </div>

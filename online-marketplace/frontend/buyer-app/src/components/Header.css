@@ -165,6 +165,37 @@
   line-height: 1.1;
 }
 
+/* Messages */
+.header-messages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  height: 36px;
+}
+
+.header-messages:hover {
+  border-color: white;
+}
+
+.messages-icon {
+  width: 20px;
+  height: 20px;
+  color: white;
+}
+
+.messages-text {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+
 /* Settings Button */
 .header-settings {
   display: flex;

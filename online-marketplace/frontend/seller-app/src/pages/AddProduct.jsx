@@ -1,19 +1,21 @@
 import Sidebar from "../components/Sidebar";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import categories from "../utils/categories";
 import "./PageStyles.css";
 
 function AddProduct() {
   const [category, setCategory] = useState("");
-  const [subcategories, setSubcategories] = useState([]);
+  const [activeSubcategory, setActiveSubcategory] = useState(null);
   const [addedProducts, setAddedProducts] = useState([]);
-  const [activeSubcategory, setActiveSubcategory] = useState(null); // for modal/form
 
   // Form state
   const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
+  const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const selectedCategory = categories.find((c) => c.name === category);
   const subcategoriesList = selectedCategory?.subcategories || [];
@@ -23,7 +25,17 @@ function AddProduct() {
     setProductName("");
     setPrice("");
     setStock("");
+    setDescription("");
     setImage(null);
+    setImagePreview(null);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = (e) => {
@@ -34,14 +46,15 @@ function AddProduct() {
       id: Date.now(),
       category,
       subcategory: activeSubcategory.name,
-      image: image ? URL.createObjectURL(image) : activeSubcategory.image,
+      image: imagePreview || activeSubcategory.image,
       name: productName,
       price: parseFloat(price).toFixed(2),
       stock: parseInt(stock),
+      description,
     };
 
-    setAddedProducts([...addedProducts, newProduct]);
-    setActiveSubcategory(null); // close form
+    setAddedProducts([newProduct, ...addedProducts]);
+    setActiveSubcategory(null);
   };
 
   return (
@@ -49,55 +62,74 @@ function AddProduct() {
       <Sidebar />
       <div className="page-container">
         <div className="page-header">
-          <h1 className="page-title">
-            <i className="fas fa-plus-circle"></i> Add Product
-          </h1>
-          <p className="page-subtitle">Select a category and add your products to start selling</p>
+          <div className="header-content-left">
+            <h1 className="page-title">
+              <i className="fas fa-plus-circle"></i> Add Product
+            </h1>
+            <p className="page-subtitle">Select a category and add your products</p>
+          </div>
+          {addedProducts.length > 0 && (
+            <div className="header-stats">
+              <div className="header-stat success">
+                <span className="num">{addedProducts.length}</span>
+                <span className="label">Products Added</span>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Category Buttons */}
+        {/* Progress Steps */}
+        <div className="progress-steps">
+          <div className={`step ${category ? "completed" : "active"}`}>
+            <span className="step-num">1</span>
+            <span className="step-text">Pick a Category</span>
+          </div>
+          <div className={`step ${category && !activeSubcategory ? "active" : activeSubcategory ? "completed" : ""}`}>
+            <span className="step-num">2</span>
+            <span className="step-text">Pick a Type</span>
+          </div>
+          <div className={`step ${activeSubcategory ? "active" : ""}`}>
+            <span className="step-num">3</span>
+            <span className="step-text">Fill Details</span>
+          </div>
+        </div>
+
+        {/* Category Selection */}
         <div className="content-card">
           <h2 className="section-title">
-            <i className="fas fa-tags"></i> Select Category
+            <i className="fas fa-th-large"></i> What are you selling?
           </h2>
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "20px" }}>
+          <p className="section-hint">Pick the category that best describes your product</p>
+          <div className="category-grid">
             {categories.map((c) => (
               <button
                 key={c.name}
                 onClick={() => setCategory(c.name)}
-                className={category === c.name ? "btn-primary" : "btn-secondary"}
-                style={{
-                  border: category === c.name ? "none" : "2px solid #e0e0e0",
-                  background: category === c.name ? undefined : "#fff"
-                }}
+                className={`category-card ${category === c.name ? "selected" : ""}`}
               >
-                {c.name}
+                <i className={`fas ${c.icon}`}></i>
+                <span>{c.name}</span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Subcategory Boxes */}
+        {/* Subcategory Selection */}
         {category && (
           <div className="content-card">
             <h2 className="section-title">
-              <i className="fas fa-folder"></i> {category}
+              <i className="fas fa-list"></i> What type of {category.split(' ')[0].toLowerCase()}?
             </h2>
-            <div className="product-grid">
+            <p className="section-hint">Click on the type that matches your product</p>
+            <div className="subcategory-grid">
               {subcategoriesList.map((sub) => (
                 <div
                   key={sub.name}
                   onClick={() => openForm(sub)}
-                  className="product-card"
+                  className="subcategory-card"
                 >
-                  <img
-                    src={sub.image}
-                    alt={sub.name}
-                    className="product-image"
-                  />
-                  <div className="product-info">
-                    <p className="product-name">{sub.name}</p>
-                  </div>
+                  <img src={sub.image} alt={sub.name} />
+                  <span>{sub.name}</span>
                 </div>
               ))}
             </div>
@@ -107,60 +139,90 @@ function AddProduct() {
         {/* Modal Form */}
         {activeSubcategory && (
           <div className="modal-overlay" onClick={() => setActiveSubcategory(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h2 style={{ marginBottom: "20px", color: "#1a5d3a" }}>
-                Add Product to {activeSubcategory.name}
-              </h2>
-              <form onSubmit={handleSubmit}>
+            <div className="modal-content enhanced" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2><i className="fas fa-plus-circle"></i> Add Product</h2>
+                <button className="modal-close" onClick={() => setActiveSubcategory(null)}>
+                  <i className="fas fa-times"></i>
+                </button>
+              </div>
+              <div className="modal-subtitle">
+                <span className="breadcrumb">{category} / {activeSubcategory.name}</span>
+              </div>
+              <form onSubmit={handleSubmit} className="product-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label><i className="fas fa-tag"></i> Product Name</label>
+                    <input
+                      type="text"
+                      placeholder="Enter product name"
+                      value={productName}
+                      onChange={(e) => setProductName(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="form-row two-col">
+                  <div className="form-group">
+                    <label><i className="fas fa-dollar-sign"></i> Price</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="0.00"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label><i className="fas fa-box"></i> Stock Quantity</label>
+                    <input
+                      type="number"
+                      placeholder="0"
+                      value={stock}
+                      onChange={(e) => setStock(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
                 <div className="form-group">
-                  <label>Product Name</label>
-                  <input
-                    type="text"
-                    placeholder="Enter product name"
-                    value={productName}
-                    onChange={(e) => setProductName(e.target.value)}
-                    required
+                  <label><i className="fas fa-align-left"></i> Description (Optional)</label>
+                  <textarea
+                    placeholder="Describe your product..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={3}
                   />
                 </div>
                 <div className="form-group">
-                  <label>Price</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    placeholder="Enter price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    required
-                  />
+                  <label><i className="fas fa-image"></i> Product Image</label>
+                  <div className="image-upload">
+                    {imagePreview ? (
+                      <div className="image-preview">
+                        <img src={imagePreview} alt="Preview" />
+                        <button type="button" onClick={() => { setImage(null); setImagePreview(null); }}>
+                          <i className="fas fa-times"></i>
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="upload-area">
+                        <i className="fas fa-cloud-upload-alt"></i>
+                        <span>Click to upload image</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                        />
+                      </label>
+                    )}
+                  </div>
                 </div>
-                <div className="form-group">
-                  <label>Available Stock</label>
-                  <input
-                    type="number"
-                    placeholder="Enter stock quantity"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Product Image</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImage(e.target.files[0])}
-                  />
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "20px", gap: "10px" }}>
-                  <button type="submit" className="btn-primary">
-                    <i className="fas fa-check"></i> Add Product
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveSubcategory(null)}
-                    className="btn-secondary"
-                  >
+                <div className="form-actions">
+                  <button type="button" onClick={() => setActiveSubcategory(null)} className="btn-secondary">
                     Cancel
+                  </button>
+                  <button type="submit" className="btn-primary">
+                    <i className="fas fa-plus"></i> Add Product
                   </button>
                 </div>
               </form>
@@ -171,22 +233,26 @@ function AddProduct() {
         {/* Added Products */}
         {addedProducts.length > 0 && (
           <div className="content-card">
-            <h2 className="section-title">
-              <i className="fas fa-check-circle"></i> Products Added
-            </h2>
-            <div className="product-grid">
+            <div className="card-header-row">
+              <h2 className="section-title">
+                <i className="fas fa-check-circle"></i> Recently Added
+              </h2>
+              <Link to="/your-listings" className="view-all-link">
+                View All Listings <i className="fas fa-arrow-right"></i>
+              </Link>
+            </div>
+            <div className="product-grid-enhanced">
               {addedProducts.map((p) => (
-                <div key={p.id} className="product-card">
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    className="product-image"
-                  />
-                  <div className="product-info">
-                    <p style={{ fontSize: "12px", color: "#666", margin: "5px 0" }}>{p.category}</p>
-                    <p className="product-name">{p.subcategory}</p>
+                <div key={p.id} className="product-card-enhanced">
+                  <div className="product-image-container">
+                    <img src={p.image} alt={p.name} />
+                    <span className="stock-badge success">Just Added</span>
+                  </div>
+                  <div className="product-content">
+                    <span className="product-category">{p.category} / {p.subcategory}</span>
+                    <h3 className="product-name">{p.name}</h3>
                     <p className="product-price">${p.price}</p>
-                    <p className="product-stock">Stock: {p.stock}</p>
+                    <span className="product-stock"><i className="fas fa-box"></i> {p.stock} in stock</span>
                   </div>
                 </div>
               ))}

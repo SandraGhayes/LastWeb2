@@ -21,6 +21,7 @@ import FAQPage from "./pages/FAQPage";
 import ShippingPolicyPage from "./pages/ShippingPolicyPage";
 import ReturnPolicyPage from "./pages/ReturnPolicyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import MessagesPage from "./pages/MessagesPage";
 import "./App.css";
 
 // Create context for navigation toggle
@@ -103,6 +104,9 @@ function AppContent() {
 
             {/* Orders */}
             <Route path="/orders" element={<OrdersPage />} />
+
+            {/* Messages */}
+            <Route path="/messages" element={<MessagesPage />} />
           </Routes>
         </div>
       </div>
