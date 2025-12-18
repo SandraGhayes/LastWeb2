@@ -44,8 +44,8 @@ function Sidebar() {
 
       <ul className="sidebar-menu">
         <li>
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className={`sidebar-link ${location.pathname === "/" ? "active" : ""}`}
           >
             <i className="fas fa-chart-line"></i> Dashboard
@@ -53,8 +53,8 @@ function Sidebar() {
         </li>
 
         <li>
-          <Link 
-            to="/add-product" 
+          <Link
+            to="/add-product"
             className={`sidebar-link ${location.pathname === "/add-product" ? "active" : ""}`}
           >
             <i className="fas fa-plus-circle"></i> Add Product
@@ -62,8 +62,8 @@ function Sidebar() {
         </li>
 
         <li>
-          <Link 
-            to="/your-listings" 
+          <Link
+            to="/your-listings"
             className={`sidebar-link ${location.pathname === "/your-listings" ? "active" : ""}`}
           >
             <i className="fas fa-box"></i> Your Listings
@@ -113,6 +113,39 @@ function Sidebar() {
               </li>
             </ul>
           )}
+        </li>
+
+        {/* Divider */}
+        <li className="sidebar-divider"></li>
+
+        {/* Analytics */}
+        <li>
+          <Link
+            to="/analytics"
+            className={`sidebar-link ${location.pathname === "/analytics" ? "active" : ""}`}
+          >
+            <i className="fas fa-chart-pie"></i> Analytics
+          </Link>
+        </li>
+
+        {/* Messages */}
+        <li>
+          <Link
+            to="/messages"
+            className={`sidebar-link ${location.pathname === "/messages" ? "active" : ""}`}
+          >
+            <i className="fas fa-comments"></i> Messages
+          </Link>
+        </li>
+
+        {/* Settings */}
+        <li>
+          <Link
+            to="/settings"
+            className={`sidebar-link ${location.pathname === "/settings" ? "active" : ""}`}
+          >
+            <i className="fas fa-cog"></i> Settings
+          </Link>
         </li>
       </ul>
 

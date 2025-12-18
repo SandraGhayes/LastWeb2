@@ -6,6 +6,9 @@ import YourListings from "./pages/YourListings";
 import PendingOrders from "./pages/PendingOrders";
 import History from "./pages/History";
 import Orders from "./pages/Orders";
+import Settings from "./pages/Settings";
+import Analytics from "./pages/Analytics";
+import Messages from "./pages/Messages";
 import ProtectedRoute from "./components/ProtectedRoute";
 import "./styles/main.css";
 
@@ -28,7 +31,7 @@ function App() {
           <ProtectedRoute>
             <YourListings />
           </ProtectedRoute>
-        } /> 
+        } />
         <Route path="/pending-orders" element={
           <ProtectedRoute>
             <PendingOrders />
@@ -44,6 +47,21 @@ function App() {
             <Orders />
           </ProtectedRoute>
         } />
+        <Route path="/settings" element={
+          <ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>
+        } />
+        <Route path="/analytics" element={
+          <ProtectedRoute>
+            <Analytics />
+          </ProtectedRoute>
+        } />
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <Messages />
+          </ProtectedRoute>
+        } />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
@@ -51,3 +69,4 @@ function App() {
 }
 
 export default App;
+

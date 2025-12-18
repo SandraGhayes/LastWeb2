@@ -1,118 +1,153 @@
 import Sidebar from "../components/Sidebar";
 import { useState } from "react";
-import OrdersFilterBar from "../components/OrdersFilterBar";
+import { Link } from "react-router-dom";
 import "./PageStyles.css";
 
-
 function History() {
-  // Sample sold orders for frontend display
-  const [soldOrders, setSoldOrders] = useState([
-    {
-      id: 1,
-      product: "PlayStation 5",
-      category: "Gaming",
-      quantity: 2,
-      buyer: "John Doe",
-      price: 499,
-      date: "2025-12-01",
-      datePublished: "2025-11-20",
-      image: "https://i.imgur.com/PS5.jpg",
-    },
-    {
-      id: 2,
-      product: "Nintendo Switch",
-      category: "Gaming",
-      quantity: 1,
-      buyer: "Jane Smith",
-      price: 299,
-      date: "2025-12-02",
-      datePublished: "2025-11-25",
-      image: "https://i.imgur.com/NS.jpg",
-    },
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateRange, setDateRange] = useState("all");
+
+  const [soldOrders] = useState([
+    { id: 1226, product: "Wireless Earbuds Pro", qty: 2, buyer: "Ahmed M.", amount: 178, date: "2024-01-15", status: "Delivered", image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100" },
+    { id: 1225, product: "Smart Watch Series X", qty: 1, buyer: "Sara K.", amount: 199, date: "2024-01-14", status: "Delivered", image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=100" },
+    { id: 1224, product: "Bluetooth Speaker", qty: 1, buyer: "Omar A.", amount: 65, date: "2024-01-13", status: "Delivered", image: "https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=100" },
+    { id: 1223, product: "Laptop Stand Pro", qty: 1, buyer: "Laila A.", amount: 45, date: "2024-01-12", status: "Refunded", image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100" },
+    { id: 1222, product: "USB-C Hub 7-in-1", qty: 2, buyer: "Youssef K.", amount: 70, date: "2024-01-11", status: "Delivered", image: "https://images.unsplash.com/photo-1625723044792-44de16ccb4e9?w=100" },
+    { id: 1221, product: "Gaming Mouse Pro", qty: 1, buyer: "Mona M.", amount: 89, date: "2024-01-10", status: "Delivered", image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100" },
   ]);
-  
-  const [filteredOrders, setFilteredOrders] = useState(soldOrders);
 
-  const applyFilters = (filters) => {
-    let data = [...soldOrders];
+  // Stats
+  const totalSales = soldOrders.filter(o => o.status === "Delivered").length;
+  const totalRevenue = soldOrders.filter(o => o.status === "Delivered").reduce((sum, o) => sum + o.amount, 0);
+  const refundedCount = soldOrders.filter(o => o.status === "Refunded").length;
 
-    // By date sold
-    if (filters.dateSold) {
-      data = data.filter((o) => o.date === filters.dateSold);
-    }
+  const filteredOrders = soldOrders.filter(order => {
+    const matchesFilter = filter === "all" ||
+      (filter === "delivered" && order.status === "Delivered") ||
+      (filter === "refunded" && order.status === "Refunded");
+    const matchesSearch = order.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.buyer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.id.toString().includes(searchTerm);
+    return matchesFilter && matchesSearch;
+  });
 
-    // By date published
-    if (filters.datePublished) {
-      data = data.filter((o) => o.datePublished === filters.datePublished);
-    }
-
-    // Category
-    if (filters.category.trim() !== "") {
-      data = data.filter((o) =>
-        o.category.toLowerCase().includes(filters.category.toLowerCase())
-      );
-    }
-
-    // Price range
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange === "600+"
-        ? [600, Infinity]
-        : filters.priceRange.split("-").map(Number);
-
-      data = data.filter((o) => o.price >= min && o.price <= max);
-    }
-
-    // Sorting
-    if (filters.sort === "high-low") {
-      data.sort((a, b) => b.price - a.price);
-    } else if (filters.sort === "low-high") {
-      data.sort((a, b) => a.price - b.price);
-    } else if (filters.sort === "recent") {
-      data.sort((a, b) => new Date(b.date) - new Date(a.date));
-    }
-
-    setFilteredOrders(data);
-  };
-
-
-  
-return (
+  return (
     <div className="seller-app">
       <Sidebar />
       <div className="page-container">
         <div className="page-header">
-          <h1 className="page-title">
-            <i className="fas fa-history"></i> Sales History
-          </h1>
-          <p className="page-subtitle">View all your completed sales and transactions</p>
+          <div className="header-content-left">
+            <h1 className="page-title">
+              <i className="fas fa-history"></i> Sales History
+            </h1>
+            <p className="page-subtitle">View all your completed orders and transactions</p>
+          </div>
         </div>
 
-        <div className="content-card">
-          <OrdersFilterBar onFilterChange={applyFilters} showDateSold={true} />
+        {/* Stats */}
+        <div className="stats-row small">
+          <div className="stat-card completed">
+            <i className="fas fa-check-circle"></i>
+            <div className="stat-data">
+              <span className="stat-num">{totalSales}</span>
+              <span className="stat-label">Total Sales</span>
+            </div>
+          </div>
+          <div className="stat-card revenue">
+            <i className="fas fa-dollar-sign"></i>
+            <div className="stat-data">
+              <span className="stat-num">${totalRevenue}</span>
+              <span className="stat-label">Total Revenue</span>
+            </div>
+          </div>
+          <div className="stat-card refunded">
+            <i className="fas fa-undo"></i>
+            <div className="stat-data">
+              <span className="stat-num">{refundedCount}</span>
+              <span className="stat-label">Refunded</span>
+            </div>
+          </div>
         </div>
-        
+
+        {/* Filters */}
+        <div className="content-card filter-card">
+          <div className="filter-row">
+            <div className="filter-tabs">
+              <button
+                className={`filter-tab ${filter === "all" ? "active" : ""}`}
+                onClick={() => setFilter("all")}
+              >
+                All ({soldOrders.length})
+              </button>
+              <button
+                className={`filter-tab ${filter === "delivered" ? "active" : ""}`}
+                onClick={() => setFilter("delivered")}
+              >
+                <i className="fas fa-check"></i> Delivered ({totalSales})
+              </button>
+              <button
+                className={`filter-tab ${filter === "refunded" ? "active" : ""}`}
+                onClick={() => setFilter("refunded")}
+              >
+                <i className="fas fa-undo"></i> Refunded ({refundedCount})
+              </button>
+            </div>
+            <div className="search-box">
+              <i className="fas fa-search"></i>
+              <input
+                type="text"
+                placeholder="Search history..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* History Table */}
         <div className="content-card">
           {filteredOrders.length === 0 ? (
             <div className="empty-state">
               <i className="fas fa-inbox"></i>
-              <p>No sales history found.</p>
+              <h3>No sales history</h3>
+              <p>No orders match your criteria.</p>
             </div>
           ) : (
-            <div className="product-grid">
-              {filteredOrders.map((order) => (
-                <div key={order.id} className="product-card">
-                  <img src={order.image} alt={order.product} className="product-image" />
-                  <div className="product-info" style={{ textAlign: "left" }}>
-                    <h3 className="product-name">{order.product}</h3>
-                    <p className="product-stock"><strong>Category:</strong> {order.category}</p>
-                    <p className="product-stock"><strong>Quantity:</strong> {order.quantity}</p>
-                    <p className="product-price">Price: ${order.price}</p>
-                    <p className="product-price">Total: ${(order.price * order.quantity).toFixed(2)}</p>
-                    <p className="product-stock"><strong>Buyer:</strong> {order.buyer}</p>
-                    <p className="product-stock" style={{ fontSize: "12px" }}><strong>Date Sold:</strong> {order.date}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Order ID</th>
+                    <th>Product</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOrders.map((order) => (
+                    <tr key={order.id}>
+                      <td className="order-id">#{order.id}</td>
+                      <td>
+                        <div className="product-cell-with-img">
+                          <img src={order.image} alt={order.product} />
+                          <span>{order.product}</span>
+                        </div>
+                      </td>
+                      <td>{order.buyer}</td>
+                      <td><span className="date-tag">{order.date}</span></td>
+                      <td className="amount">${order.amount}</td>
+                      <td>
+                        <span className={`status-badge ${order.status.toLowerCase()}`}>
+                          {order.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
