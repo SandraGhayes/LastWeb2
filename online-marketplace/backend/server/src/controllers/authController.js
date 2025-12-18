@@ -36,7 +36,13 @@ const registerUser = async (req, res, Model, role) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res.status(201).json({ message: 'Registered successfully', user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.status(201).json({
+      success: true,
+      data: {
+        token,
+        user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Registration failed', error: err.message });
   }
@@ -74,7 +80,13 @@ const loginUser = async (req, res, Model) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({ message: 'Logged in successfully', user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    res.status(200).json({
+      success: true,
+      data: {
+        token,
+        user: { id: user._id, name: user.name, email: user.email, role: user.role }
+      }
+    });
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: err.message });
   }

@@ -1,49 +1,87 @@
 // src/services/api.js
-import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
-// Create axios instance
-const api = axios.create({
-    baseURL: API_URL,
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    withCredentials: true, // Important for cookies
-});
+const request = async (endpoint, options = {}) => {
+    const token = localStorage.getItem('token');
 
-// Request interceptor to add token
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
+    const defaults = {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        credentials: 'include',
+    };
+
+    // Handle query parameters if they exist
+    let url = `${API_URL}${endpoint}`;
+    if (options.params) {
+        const query = new URLSearchParams(options.params).toString();
+        url += `?${query}`;
     }
-);
 
-// Response interceptor for error handling
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response) {
-            // Handle 401 Unauthorized
-            if (error.response.status === 401) {
-                localStorage.removeItem('token');
+    const config = {
+        ...defaults,
+        ...options,
+        headers: {
+            ...defaults.headers,
+            ...options.headers
+        }
+    };
+
+    // Remove axios-specific properties that fetch doesn't support
+    delete config.params;
+
+    let response;
+    try {
+        response = await fetch(url, config);
+    } catch (networkError) {
+        throw new Error('Network Error');
+    }
+
+    if (!response.ok) {
+        // Handle 401 Unauthorized globally
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            if (!window.location.pathname.includes('/login')) {
                 window.location.href = '/login';
             }
-
-            // Extract error message
-            const message = error.response.data?.message || error.response.data?.error || 'An error occurred';
-            return Promise.reject(new Error(message));
         }
 
-        return Promise.reject(error);
+        let errorData;
+        try {
+            errorData = await response.json();
+        } catch (e) {
+            errorData = { message: response.statusText };
+        }
+
+        // Construct an error object similar to Axios error.response
+        const error = new Error(errorData.message || errorData.error || 'An error occurred');
+        error.response = {
+            data: errorData,
+            status: response.status,
+            statusText: response.statusText
+        };
+        throw error;
     }
-);
+
+    // Success
+    const data = await response.json();
+
+    // Return object mimicking axios response structure
+    return {
+        data: data,
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
+    };
+};
+
+const api = {
+    get: (endpoint, options = {}) => request(endpoint, { ...options, method: 'GET' }),
+    post: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) }),
+    put: (endpoint, body, options = {}) => request(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) }),
+    delete: (endpoint, options = {}) => request(endpoint, { ...options, method: 'DELETE' }),
+};
 
 export default api;

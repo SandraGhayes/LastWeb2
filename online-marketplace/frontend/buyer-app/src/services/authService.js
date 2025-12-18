@@ -17,9 +17,20 @@ const authService = {
         try {
             const response = await api.post('/auth/login/buyer', { email, password });
 
+
+
             if (response.data.success && response.data.data.token) {
                 // Store token
                 localStorage.setItem('token', response.data.data.token);
+
+                // Store user data for MarketPlace component
+                const userData = {
+                    ...response.data.data.user,
+                    isAuthenticated: true,
+                    type: response.data.data.user.role || 'buyer'
+                };
+                localStorage.setItem('user', JSON.stringify(userData));
+
                 return response.data.data;
             }
 
@@ -34,9 +45,11 @@ const authService = {
         try {
             await api.post('/auth/logout');
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
         } catch (error) {
             // Even if API call fails, remove token locally
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
             throw error;
         }
     },
