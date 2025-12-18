@@ -8,6 +8,7 @@ function YourListings() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filter, setFilter] = useState("all");
 
+  // Temporary sample items _ now including price
   const [products, setProducts] = useState([
     { id: 1, name: "Wireless Earbuds Pro", stock: 24, price: 89.99, category: "Electronics", sales: 34, image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200", status: "active" },
     { id: 2, name: "Smart Watch Series X", stock: 12, price: 199.99, category: "Electronics", sales: 28, image: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=200", status: "active" },

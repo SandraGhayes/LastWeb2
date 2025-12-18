@@ -1,6 +1,8 @@
 // src/App.jsx - Cleaned Version
 import React, { createContext } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ProductProvider } from "./context/ProductContext";
 import { CartProvider } from "./context/CartContext";
 import Header from "./components/Header";
 import Categories from "./components/Categories";
@@ -114,11 +116,15 @@ function AppContent() {
 
 function App() {
   return (
-    <CartProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </CartProvider>
+    <AuthProvider>
+      <ProductProvider>
+        <CartProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </CartProvider>
+      </ProductProvider>
+    </AuthProvider>
   );
 }
 

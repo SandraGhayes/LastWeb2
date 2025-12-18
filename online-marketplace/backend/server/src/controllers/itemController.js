@@ -20,3 +20,13 @@ exports.listItems = async (req, res) => {
     success(res, result);
   } catch (err) { error(res, err.message); }
 };
+
+exports.getItemById = async (req, res) => {
+  try {
+    const item = await itemService.getItemById(req.params.id);
+    if (!item) {
+      return error(res, 'Item not found', 404);
+    }
+    success(res, item);
+  } catch (err) { error(res, err.message); }
+};

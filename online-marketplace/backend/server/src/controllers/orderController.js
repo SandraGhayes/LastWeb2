@@ -19,3 +19,11 @@ exports.updateStatus = async (req, res) => {
     success(res, order);
   } catch (err) { error(res, err.message, 400); }
 };
+
+exports.getBuyerOrders = async (req, res) => {
+  try {
+    const buyerId = req.user._id;
+    const orders = await orderService.getBuyerOrders(buyerId);
+    success(res, orders);
+  } catch (err) { error(res, err.message); }
+};
